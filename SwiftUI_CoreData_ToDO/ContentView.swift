@@ -7,6 +7,12 @@
 
 import SwiftUI
 
+enum ActiveSheet: Identifiable {
+    var id: UUID { UUID() }
+    
+    case addView
+    case updateView
+}
 
 struct ContentView: View {
     
@@ -15,7 +21,7 @@ struct ContentView: View {
     @FetchRequest(sortDescriptors: [NSSortDescriptor(keyPath: \Task.priority, ascending: false), NSSortDescriptor(keyPath: \Task.timestamp, ascending: true)])
     var tasks: FetchedResults<Task>
     
-    @State private var presentSheet = false
+    @State private var activeSheet: ActiveSheet? = nil
     private var priorityRepresentation = ["", "!!", "!!!"]
     
     
@@ -32,16 +38,25 @@ struct ContentView: View {
                     
                     ToolbarItem(placement: .primaryAction) {
                         Button(action: {
-                            presentSheet.toggle()
+//                            presentSheet.toggle()
+                            activeSheet = .addView
                             
                         }, label: {
                             Image(systemName: "plus")
                         })
                     }
                 }
-                .sheet(isPresented: $presentSheet, content: {
-                    AddTaskView()
-                })
+                .sheet(item: $activeSheet) { activeSheet in
+                    switch activeSheet {
+                    case .addView:
+                        AddTaskView()
+                    case .updateView:
+                        Text("update")
+                    }
+                }
+//                .sheet(isPresented: $presentSheet, content: {
+//                    AddTaskView()
+//            })
         }
     }
     @ViewBuilder
@@ -76,15 +91,6 @@ struct ContentView: View {
     
     func deletItem (offsets: IndexSet) {
         offsets.map { tasks[$0]}.forEach(viewContext.delete)
-        //
-        //        var taskToDelet = Array<Task>()
-        //
-        //        for index in offsets {
-        //            taskToDelet.append(tasks[index])
-        //        }
-        //        for task in taskToDelet {
-        //            viewContext.delete(task)
-        //        }
         try? viewContext.save()
     }
 }

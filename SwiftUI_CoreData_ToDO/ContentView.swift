@@ -11,7 +11,7 @@ enum ActiveSheet: Identifiable {
     var id: UUID { UUID() }
     
     case addView
-    case updateView
+    case updateView(task : Task)
 }
 
 struct ContentView: View {
@@ -35,10 +35,9 @@ struct ContentView: View {
                         EditButton()
                             .disabled(tasks.isEmpty)
                     }
-                    
                     ToolbarItem(placement: .primaryAction) {
                         Button(action: {
-//                            presentSheet.toggle()
+                            //                            presentSheet.toggle()
                             activeSheet = .addView
                             
                         }, label: {
@@ -50,13 +49,13 @@ struct ContentView: View {
                     switch activeSheet {
                     case .addView:
                         AddTaskView()
-                    case .updateView:
-                        Text("update")
+                    case .updateView(let task):
+                        AddTaskView(task: task)
                     }
                 }
-//                .sheet(isPresented: $presentSheet, content: {
-//                    AddTaskView()
-//            })
+            //                .sheet(isPresented: $presentSheet, content: {
+            //                    AddTaskView()
+            //            })
         }
     }
     @ViewBuilder
@@ -81,13 +80,15 @@ struct ContentView: View {
                             .fontWeight(.semibold)
                         Text(task.title ?? "N/A")
                     }
+                    .onTapGesture {
+                        activeSheet = .updateView(task: task)
+                    }
                 }
                 .onDelete(perform: deletItem)
             }
             .listStyle(PlainListStyle())
         }
     }
-    
     
     func deletItem (offsets: IndexSet) {
         offsets.map { tasks[$0]}.forEach(viewContext.delete)

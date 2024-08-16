@@ -13,8 +13,16 @@ struct AddTaskView: View {
     @Environment (\.presentationMode) var presentationmode
     @Environment (\.managedObjectContext) var viewContext
     
-    @State private var title = ""
-    @State private var priority = 0
+    @State private var title: String
+    @State private var priority: Int
+    private var task: Task?
+    
+    init(task: Task? = nil) {
+        self.task = task
+        self._title = State(initialValue: task?.title ?? "")
+        self._priority = State(initialValue: Int(task?.priority ?? 0))
+    }
+    
     
     var body: some View {
         
@@ -34,7 +42,7 @@ struct AddTaskView: View {
                     .pickerStyle(SegmentedPickerStyle())
                 }
             }
-            .navigationTitle("Neue Aufgabe")
+           
             .toolbar(content: {
                 ToolbarItem(placement: .navigationBarLeading) {
                     Button("Abbrechen") {
@@ -44,13 +52,26 @@ struct AddTaskView: View {
                 
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("Speichern") {
-                        creatTask()
+                        if let task = task {
+                           updateTask(task: task)
+                        }else {
+                            creatTask()
+                        }
                         presentationmode.wrappedValue.dismiss()
                     }
                     .disabled(title.isEmpty)
                 }
             })
+            .navigationTitle(task == nil ? "Neue Aufgabe" : "Bearbeiten")
+            .navigationBarTitleDisplayMode(task == nil ? .large : .inline)
         }
+    }
+    
+    func updateTask(task: Task) {
+        task.title = title
+        task.priority = Int16(priority)
+        
+        try? viewContext.save()
     }
     
         func creatTask () {

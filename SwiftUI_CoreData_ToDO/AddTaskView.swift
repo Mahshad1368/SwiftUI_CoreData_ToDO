@@ -28,7 +28,7 @@ struct AddTaskView: View {
                     Picker("", selection: $priority) {
                         Text("Normal").tag(0)
                         Text("!!").tag(1)
-                        Text("!!!").tag(3)
+                        Text("!!!").tag(2)
                         
                     }
                     .pickerStyle(SegmentedPickerStyle())
@@ -47,7 +47,7 @@ struct AddTaskView: View {
                         creatTask()
                         presentationmode.wrappedValue.dismiss()
                     }
-                    .disabled(title.count == 0)
+                    .disabled(title.isEmpty)
                 }
             })
         }
@@ -56,7 +56,7 @@ struct AddTaskView: View {
         func creatTask () {
             let task = Task(context: viewContext)
             task.id = UUID()
-            task.itemstamp = Date()
+            task.timestamp = Date()
             task.priority = Int16(priority)
             task.title = title
             
